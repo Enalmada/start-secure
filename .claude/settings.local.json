@@ -1,12 +1,16 @@
 {
-  "permissions": {
-    "allow": [
-      "Read(//c/Users/enalm/code/open/next-secure/**)",
-      "Read(//c/Users/enalm/code/open/next-secure/.changeset/**)",
-      "Read(//c/Users/enalm/code/open/tanstarter/.github/workflows/**)",
-      "Bash(bunx changeset:*)"
-    ],
-    "deny": [],
-    "ask": []
-  }
+	"permissions": {
+		"allow": [
+			"Read(//c/Users/enalm/code/open/next-secure/**)",
+			"Read(//c/Users/enalm/code/open/next-secure/.changeset/**)",
+			"Read(//c/Users/enalm/code/open/tanstarter/.github/workflows/**)",
+			"Bash(bunx changeset:*)",
+			"Bash(git checkout:*)",
+			"Bash(git push:*)",
+			"Bash(gh pr create:*)",
+			"Bash(git stash:*)"
+		],
+		"deny": [],
+		"ask": []
+	}
 }
