@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/enalm/code/open/next-secure/**)",
+      "Read(//c/Users/enalm/code/open/next-secure/.changeset/**)",
+      "Read(//c/Users/enalm/code/open/tanstarter/.github/workflows/**)",
+      "Bash(bunx changeset:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

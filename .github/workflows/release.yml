@@ -1,0 +1,12 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    uses: enalmada/.github/.github/workflows/release.yml@main
+    secrets:
+      npm_token: ${{ secrets.NPM_TOKEN }}

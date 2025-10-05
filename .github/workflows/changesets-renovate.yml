@@ -1,0 +1,12 @@
+name: Generate changeset for Renovate
+
+on:
+  pull_request_target:
+    paths:
+      - '.github/workflows/changesets-renovate.yml'
+      - 'bun.lockb'
+      - 'package.json'
+
+jobs:
+  generate-changeset:
+    uses: enalmada/.github/.github/workflows/changesets-renovate.yml@main
