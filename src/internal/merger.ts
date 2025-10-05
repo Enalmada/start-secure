@@ -46,18 +46,6 @@ function validateCspValue(directive: string, value: string, isDev: boolean, rule
 				` Consider using specific origins.${ruleInfo}`,
 		);
 	}
-
-	// Check for overly permissive patterns
-	if (value.includes("*") && value !== "*" && !value.startsWith("ws://") && !value.startsWith("wss://")) {
-		// Allow websocket wildcards like ws://localhost:* in dev
-		const isDevWebsocket = isDev && (value.startsWith("ws://localhost:") || value.startsWith("wss://localhost:"));
-		if (!isDevWebsocket) {
-			// biome-ignore lint/suspicious/noConsole: Security warnings are intentional
-			console.warn(
-				`[@enalmada/start-secure] WARNING: Wildcard pattern "${value}" in "${directive}" may be too permissive.${ruleInfo}`,
-			);
-		}
-	}
 }
 
 /**
