@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 04567a0: Add GitHub Actions workflows and changesets configuration for CI/CD
+
 ## 0.1.0 (Initial Release)
 
 ### Features
