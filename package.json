@@ -1,10 +1,18 @@
 {
 	"name": "@enalmada/start-secure",
-	"description": "Security header management for TanStack Start",
 	"version": "0.1.0",
-	"author": "Adam Lane",
-	"bugs": {
-		"url": "https://github.com/Enalmada/start-secure/issues"
+	"scripts": {
+		"build": "bun run type-check && bun run clean && bun run build:bundle && bun run build:declaration",
+		"build:bundle": "bun build.ts",
+		"build:declaration": "tsc --emitDeclarationOnly",
+		"check": "turbo lint type-check test",
+		"clean": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\"",
+		"lint": "biome check --fix --unsafe .",
+		"prepare": "lefthook install",
+		"release": "bun run build && changeset publish",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.5",
@@ -17,6 +25,12 @@
 		"turbo": "^2.5.8",
 		"typescript": "^5.9.3",
 		"vitest": "^3.2.4"
+	},
+	"author": "Adam Lane",
+	"description": "Security header management for TanStack Start",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Enalmada/start-secure/issues"
 	},
 	"exports": {
 		".": {
@@ -40,7 +54,6 @@
 		"tanstack",
 		"tanstack-start"
 	],
-	"license": "MIT",
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
 	"packageManager": "bun@1.2.23",
@@ -53,19 +66,6 @@
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Enalmada/start-secure.git"
-	},
-	"scripts": {
-		"build": "bun run type-check && bun run clean && bun run build:bundle && bun run build:declaration",
-		"build:bundle": "bun build.ts",
-		"build:declaration": "tsc --emitDeclarationOnly",
-		"check": "turbo lint type-check test",
-		"clean": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\"",
-		"lint": "biome check --fix --unsafe .",
-		"prepare": "lefthook install",
-		"release": "bun run build && changeset publish",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"type-check": "tsc --noEmit"
 	},
 	"sideEffects": false,
 	"types": "./dist/index.d.ts"
