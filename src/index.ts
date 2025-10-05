@@ -3,21 +3,16 @@
  * Security header management for TanStack Start applications
  */
 
-// Export types
+export type { StartSecureConfig } from "./handler";
+export { createSecureHandler } from "./handler";
+export {
+	defaultSecurityHeadersConfig,
+	validateNonce,
+} from "./internal/defaults";
+export { generateSecurityHeaders } from "./internal/generator";
 export type {
-  CspRule,
-  SecurityHeaders,
-  SecurityOptions,
-  SecurityHeadersConfig,
-} from './internal/types';
-
-export type { StartSecureConfig } from './handler';
-
-// Export main function
-export { createSecureHandler } from './handler';
-
-// Re-export generator for advanced use cases
-export { generateSecurityHeaders } from './internal/generator';
-
-// Re-export defaults for customization
-export { defaultSecurityHeadersConfig } from './internal/defaults';
+	CspRule,
+	SecurityHeaders,
+	SecurityHeadersConfig,
+	SecurityOptions,
+} from "./internal/types";

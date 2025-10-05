@@ -1,42 +1,30 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "ui": "tui",
-  "tasks": {
-    "build": {
-      "cache": false,
-      "outputs": ["dist/**"]
-    },
-    "clean": {
-      "cache": false
-    },
-    "build:bundle": {
-      "dependsOn": ["clean"],
-      "outputs": ["dist/**"]
-    },
-    "build:declaration": {
-      "dependsOn": ["build:bundle"],
-      "outputs": ["dist/**"]
-    },
-    "lint": {
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "test/**/*.ts",
-        "test/**/*.tsx",
-        "biome.jsonc"
-      ]
-    },
-    "test": {
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "test/**/*.ts",
-        "test/**/*.tsx",
-        "vitest.config.ts"
-      ]
-    },
-    "type-check": {
-      "inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json"]
-    }
-  }
+	"$schema": "https://turbo.build/schema.json",
+	"ui": "tui",
+	"tasks": {
+		"build": {
+			"cache": false,
+			"outputs": ["dist/**"]
+		},
+		"clean": {
+			"cache": false
+		},
+		"build:bundle": {
+			"dependsOn": ["clean"],
+			"outputs": ["dist/**"]
+		},
+		"build:declaration": {
+			"dependsOn": ["build:bundle"],
+			"outputs": ["dist/**"]
+		},
+		"lint": {
+			"inputs": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/**/*.tsx", "biome.jsonc"]
+		},
+		"test": {
+			"inputs": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/**/*.tsx", "vitest.config.ts"]
+		},
+		"type-check": {
+			"inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json"]
+		}
+	}
 }

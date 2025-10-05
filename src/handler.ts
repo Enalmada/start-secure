@@ -3,15 +3,15 @@
  * Provides middleware wrapper for applying security headers
  */
 
-import { generateSecurityHeaders } from './internal/generator';
-import type { CspRule, SecurityOptions } from './internal/types';
+import { generateSecurityHeaders } from "./internal/generator";
+import type { CspRule, SecurityOptions } from "./internal/types";
 
 /**
  * Configuration for TanStack Start security handler
  */
 export interface StartSecureConfig {
-  rules?: CspRule[];
-  options?: SecurityOptions;
+	rules?: CspRule[];
+	options?: SecurityOptions;
 }
 
 /**
@@ -40,26 +40,30 @@ export interface StartSecureConfig {
  * ```
  */
 export function createSecureHandler(config: StartSecureConfig = {}) {
-  const { rules = [], options = {} } = config;
+	const { rules = [], options = {} } = config;
 
-  return function securityMiddleware(
-    handler: (request: Request) => Promise<Response> | Response
-  ) {
-    return async function wrappedHandler(request: Request): Promise<Response> {
-      // Call the original handler
-      const response = await handler(request);
+	// Generate security headers once at middleware creation time (memoized)
+	const securityHeaders = generateSecurityHeaders(rules, options);
 
-      // Generate security headers
-      const securityHeaders = generateSecurityHeaders(rules, options);
+	return function securityMiddleware(handler: (request: Request) => Promise<Response> | Response) {
+		return async function wrappedHandler(request: Request): Promise<Response> {
+			// Call the original handler
+			const response = await handler(request);
 
-      // Create new response with security headers
-      const newResponse = new Response(response.body, response);
+			// Create new response with security headers
+			// Clone response to avoid stream consumption issues
+			const newResponse = new Response(response.body, {
+				status: response.status,
+				statusText: response.statusText,
+				headers: response.headers,
+			});
 
-      for (const [key, value] of Object.entries(securityHeaders)) {
-        newResponse.headers.set(key, value);
-      }
+			// Apply pre-generated security headers
+			for (const [key, value] of Object.entries(securityHeaders)) {
+				newResponse.headers.set(key, value);
+			}
 
-      return newResponse;
-    };
-  };
+			return newResponse;
+		};
+	};
 }
