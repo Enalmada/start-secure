@@ -22,4 +22,7 @@ npm-debug.log*
 .vscode/
 .idea/
 
+# Cache
+.turbo/
+
 docs/sessions

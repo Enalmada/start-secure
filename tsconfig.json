@@ -1,19 +1,42 @@
 {
   "compilerOptions": {
+    // Module configuration
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
     "target": "ES2022",
-    "module": "ESNext",
     "lib": ["ES2022"],
-    "moduleResolution": "bundler",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "vitest/globals", "bun"],
+
+    // Emit configuration
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "noEmit": false,
+    "isolatedModules": true,
+
+    // Type checking
+    "strict": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Module resolution
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    // Path configuration
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["dist", "node_modules", "test"]
 }

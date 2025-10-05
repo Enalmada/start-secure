@@ -1,0 +1,18 @@
+pre-commit:
+  parallel: true
+  commands:
+    type-check:
+      glob: "**/*.{ts,tsx}"
+      run: bun run type-check
+      fail_text: "❌ TypeScript errors found! Run 'bun run type-check' to see details."
+
+    lint:
+      glob: "**/*.{js,ts,cjs,mjs,jsx,tsx,json}"
+      run: bunx biome check --fix --unsafe {staged_files}
+      stage_fixed: true
+      fail_text: "❌ Linting errors found! Most have been auto-fixed. Please review the changes and commit again."
+
+    package-fix:
+      files: git diff --cached --name-only --diff-filter=ACM package.json
+      run: npm pkg fix && fixpack
+      fail_text: "❌ package.json format issues! Run 'npm pkg fix && fixpack' to fix."
