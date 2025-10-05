@@ -22,6 +22,9 @@ npm-debug.log*
 .vscode/
 .idea/
 
+# Claude Code
+.claude/*.local.json
+
 # Cache
 .turbo/
 
