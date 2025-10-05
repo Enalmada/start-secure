@@ -1,0 +1,67 @@
+{
+  "name": "@enalmada/start-secure",
+  "version": "0.1.0",
+  "description": "Security header management for TanStack Start",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "bun run clean && bun run build:bundle && bun run build:declaration",
+    "build:bundle": "bun build.ts",
+    "build:declaration": "tsc --emitDeclarationOnly",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit",
+    "lint": "biome check --write --unsafe .",
+    "pre-commit": "lint-staged",
+    "release": "bun run build && changeset publish"
+  },
+  "keywords": [
+    "tanstack",
+    "tanstack-start",
+    "security",
+    "csp",
+    "content-security-policy",
+    "headers"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Enalmada/start-secure.git"
+  },
+  "license": "MIT",
+  "author": "Adam Lane",
+  "bugs": {
+    "url": "https://github.com/Enalmada/start-secure/issues"
+  },
+  "homepage": "https://github.com/Enalmada/start-secure#readme",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@tanstack/react-start": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@changesets/cli": "^2.27.1",
+    "@enalmada/bun-externals": "0.0.7",
+    "@tanstack/react-start": "^1.103.3",
+    "@types/bun": "^1.1.13",
+    "@types/node": "^22.10.2",
+    "bun-types": "^1.1.38",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}
