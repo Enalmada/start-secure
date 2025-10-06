@@ -1,6 +1,6 @@
 {
 	"name": "@enalmada/start-secure",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"scripts": {
 		"build": "bun run type-check && bun run clean && bun run build:bundle && bun run build:declaration",
 		"build:bundle": "bun build.ts",
