@@ -83,6 +83,12 @@ export function mergeCspRules(rules: CspRule[], isDev = false): Record<string, S
 				values = value.split(/\s+/).filter(Boolean);
 			}
 
+			// Special handling for 'none' keyword - if it's mixed with other values, remove it
+			// because 'none' must be the only value for a directive
+			if (values.length > 1 && values.includes("'none'")) {
+				values = values.filter((v) => v !== "'none'");
+			}
+
 			for (const val of values) {
 				// Validate CSP value (skip validation for empty string from boolean directives)
 				if (val !== "") {
@@ -130,6 +136,20 @@ export function mergeDirectivesWithDefaults(
 			} else {
 				mergedDirectives[key] = new Set(["'self'"]);
 			}
+		}
+
+		// Convert Set to array for easier checking
+		const valuesArray = Array.from(values);
+
+		// Special handling for 'none' keyword which must be the only value
+		// If we're adding new values and 'none' exists in merged directives, remove it
+		if (valuesArray.length > 0 && !valuesArray.includes("'none'") && mergedDirectives[key].has("'none'")) {
+			mergedDirectives[key].delete("'none'");
+		}
+
+		// If we're adding 'none', clear all other values first
+		if (valuesArray.includes("'none'")) {
+			mergedDirectives[key].clear();
 		}
 		for (const value of values) {
 			mergedDirectives[key].add(value);
