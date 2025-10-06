@@ -284,3 +284,82 @@ describe("createSecureHandler", () => {
 		await expect(wrappedHandler(new Request("http://localhost"))).rejects.toThrow("Handler failed");
 	});
 });
+
+describe("'none' keyword handling", () => {
+	test("removes 'none' when adding other values to frame-src", () => {
+		// Default has frame-src 'none', user wants to add youtube
+		const headers = generateSecurityHeaders([
+			{
+				description: "youtube",
+				"frame-src": "https://www.youtube.com",
+			},
+		]);
+
+		const csp = headers["Content-Security-Policy"];
+		const frameSrcMatch = csp.match(/frame-src ([^;]+)/);
+		expect(frameSrcMatch).toBeTruthy();
+
+		const frameSrcValue = frameSrcMatch?.[1];
+		// Should have youtube but NOT 'none'
+		expect(frameSrcValue).toContain("https://www.youtube.com");
+		expect(frameSrcValue).not.toContain("'none'");
+	});
+
+	test("handles 'none' correctly when it's the only value", () => {
+		const headers = generateSecurityHeaders([
+			{
+				description: "test",
+				"img-src": "'none'",
+			},
+		]);
+
+		const csp = headers["Content-Security-Policy"];
+		const imgSrcMatch = csp.match(/img-src ([^;]+)/);
+		expect(imgSrcMatch).toBeTruthy();
+
+		const imgSrcValue = imgSrcMatch?.[1];
+		// Should only have 'none', not 'self', blob:, or data:
+		expect(imgSrcValue?.trim()).toBe("'none'");
+		expect(imgSrcValue).not.toContain("'self'");
+		expect(imgSrcValue).not.toContain("blob:");
+		expect(imgSrcValue).not.toContain("data:");
+	});
+
+	test("removes 'none' when overriding object-src default", () => {
+		// Default has object-src 'none', user wants to add a specific source
+		const headers = generateSecurityHeaders([
+			{
+				description: "pdf-viewer",
+				"object-src": "https://cdn.example.com",
+			},
+		]);
+
+		const csp = headers["Content-Security-Policy"];
+		const objectSrcMatch = csp.match(/object-src ([^;]+)/);
+		expect(objectSrcMatch).toBeTruthy();
+
+		const objectSrcValue = objectSrcMatch?.[1];
+		// Should have the cdn but NOT 'none'
+		expect(objectSrcValue).toContain("https://cdn.example.com");
+		expect(objectSrcValue).not.toContain("'none'");
+	});
+
+	test("handles multiple values including attempt to add 'none' alongside others", () => {
+		// If user tries to add 'none' with other values, 'none' should be ignored
+		const headers = generateSecurityHeaders([
+			{
+				description: "test",
+				"frame-src": "'none' https://example.com",
+			},
+		]);
+
+		const csp = headers["Content-Security-Policy"];
+		const frameSrcMatch = csp.match(/frame-src ([^;]+)/);
+		expect(frameSrcMatch).toBeTruthy();
+
+		const frameSrcValue = frameSrcMatch?.[1];
+		// Should have example.com but NOT 'none' (since 'none' must be alone)
+		expect(frameSrcValue).toContain("https://example.com");
+		expect(frameSrcValue).not.toContain("'none'");
+	});
+});

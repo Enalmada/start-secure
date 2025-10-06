@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   release:
     uses: enalmada/.github/.github/workflows/release.yml@main
