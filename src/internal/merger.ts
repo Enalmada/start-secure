@@ -83,7 +83,6 @@ export function mergeCspRules(rules: CspRule[], isDev = false): Record<string, S
 				values = value.split(/\s+/).filter(Boolean);
 			}
 
-
 			// Special handling for 'none' keyword - if it's mixed with other values, remove it
 			// because 'none' must be the only value for a directive
 			if (values.length > 1 && values.includes("'none'")) {
