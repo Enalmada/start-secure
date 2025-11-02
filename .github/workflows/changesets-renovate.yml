@@ -4,7 +4,7 @@ on:
   pull_request_target:
     paths:
       - '.github/workflows/changesets-renovate.yml'
-      - 'bun.lockb'
+      - 'bun.lock'
       - 'package.json'
 
 jobs:
