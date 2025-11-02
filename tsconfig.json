@@ -4,7 +4,7 @@
 		"module": "ES2022",
 		"moduleResolution": "Bundler",
 		"target": "ES2022",
-		"lib": ["ES2022"],
+		"lib": ["ES2022", "DOM"],
 		"types": ["node", "vitest/globals", "bun"],
 
 		// Emit configuration
