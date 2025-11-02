@@ -5,9 +5,9 @@
 
 import { createMiddleware } from "@tanstack/react-start";
 import { getResponseHeaders, setResponseHeaders } from "@tanstack/react-start/server";
-import { generateNonce } from "./nonce";
 import { buildCspHeader } from "./internal/csp-builder";
 import type { CspRule, SecurityOptions } from "./internal/types";
+import { generateNonce } from "./nonce";
 
 /**
  * Configuration for CSP middleware

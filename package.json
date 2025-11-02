@@ -15,17 +15,17 @@
 		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.2.5",
+		"@biomejs/biome": "^2.3.2",
 		"@changesets/cli": "^2.29.7",
 		"@enalmada/bun-externals": "0.0.9",
-		"@tanstack/react-start": "^1.132.43",
-		"@types/bun": "^1.2.23",
-		"@types/node": "^24.6.2",
+		"@tanstack/react-start": "^1.134.9",
+		"@types/bun": "^1.3.1",
+		"@types/node": "^24.9.2",
 		"fixpack": "^4.0.0",
-		"lefthook": "^1.13.6",
-		"turbo": "^2.5.8",
+		"lefthook": "^2.0.2",
+		"turbo": "^2.6.0",
 		"typescript": "^5.9.3",
-		"vitest": "^3.2.4"
+		"vitest": "^4.0.6"
 	},
 	"author": "Adam Lane",
 	"description": "Security header management for TanStack Start",
@@ -35,9 +35,9 @@
 	},
 	"exports": {
 		".": {
+			"types": "./dist/index.d.ts",
 			"import": "./dist/index.mjs",
-			"require": "./dist/index.js",
-			"types": "./dist/index.d.ts"
+			"require": "./dist/index.js"
 		}
 	},
 	"files": [
@@ -57,7 +57,7 @@
 	],
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
-	"packageManager": "bun@1.2.23",
+	"packageManager": "bun@1.3.1",
 	"peerDependencies": {
 		"@tanstack/react-start": ">=1.0.0",
 		"@tanstack/start-storage-context": ">=1.0.0"
