@@ -14,18 +14,29 @@ Security header management for TanStack Start applications with native nonce sup
 - 📝 Rule descriptions for documentation
 - 🔐 **Native per-request nonce generation** (v0.2+)
 - ⚡ **Middleware pattern** for TanStack Start (v0.2+)
-- 🌐 **Isomorphic nonce access** (server + client)
-- 🚀 Minimal setup (~10 lines)
+- 🎯 **Official TanStack pattern** (direct context access, v1.0.1+)
+- 🚀 Minimal setup (~20 lines)
 
-## What's New in v0.2
+## What's New in v1.0.1
 
-TanStack Start now has **native nonce support** via `router.options.ssr.nonce`. This package has been updated to provide:
+**BREAKING CHANGE:** Removed `createNonceGetter()` due to critical AsyncLocalStorage bug.
+
+**Why the change?**
+- The isomorphic wrapper broke AsyncLocalStorage context chain
+- Scripts were rendered without nonce attributes
+- Fixed by using direct context access (official TanStack pattern)
+
+**Migration:** See [MIGRATION-1.0-to-1.0.1.md](./docs/MIGRATION-1.0-to-1.0.1.md)
+
+## What's New in v1.0.0 (Previously v0.2)
+
+TanStack Start has **native nonce support** via `router.options.ssr.nonce`. This package provides:
 
 - **Per-request nonce generation** - Unique cryptographic nonce for each request
 - **Middleware pattern** - Integrates with TanStack Start's global middleware system
-- **Isomorphic nonce getter** - Works seamlessly on server and client
 - **No `'unsafe-inline'` for scripts** - Strict CSP in production (scripts only, styles remain pragmatic)
 - **Automatic nonce application** - TanStack router applies nonces to all framework scripts
+- **Direct context access** - Official TanStack pattern (v1.0.1+)
 
 **Reference:** [TanStack Router Discussion #3028](https://github.com/TanStack/router/discussions/3028)
 
@@ -35,7 +46,7 @@ TanStack Start now has **native nonce support** via `router.options.ssr.nonce`. 
 bun add @enalmada/start-secure
 ```
 
-## Quick Start (v0.2 - Recommended)
+## Quick Start (v1.0.1 - Recommended)
 
 ### Step 1: Create CSP rules configuration
 
@@ -84,24 +95,34 @@ export const startInstance = createStart(() => ({
 
 ```typescript
 import { createRouter } from '@tanstack/react-router';
-import { createNonceGetter } from '@enalmada/start-secure';
 
-const getNonce = createNonceGetter();
+export async function getRouter() {
+  // Get nonce on server (client uses meta tag automatically)
+  let nonce: string | undefined;
 
-export function getRouter() {
+  if (typeof window === 'undefined') {
+    // Dynamic import for server-only code
+    const { getStartContext } = await import('@tanstack/start-storage-context');
+    const context = getStartContext();
+    nonce = context.contextAfterGlobalMiddlewares?.nonce;
+  }
+
   const router = createRouter({
     routeTree,
     // ... other options
-    ssr: {
-      nonce: getNonce()  // Applies nonce to all framework scripts
-    }
+    ssr: { nonce }  // Applies nonce to all framework scripts
   });
 
   return router;
 }
 ```
 
-That's it! **Total setup: ~10 lines of code.**
+**Why this pattern?**
+- Direct context access (official TanStack pattern)
+- No wrapper to break AsyncLocalStorage
+- Works on both server and client
+
+That's it! **Total setup: ~20 lines of code.**
 
 ## API Reference
 
@@ -131,21 +152,25 @@ const middleware = createCspMiddleware({
 });
 ```
 
-#### `createNonceGetter()`
+#### `createNonceGetter()` ⚠️ REMOVED in v1.0.1
 
-Creates an isomorphic function that retrieves the nonce on both server and client.
+**This function has been removed due to a critical AsyncLocalStorage bug.**
 
-**Server behavior:** Retrieves nonce from TanStack Start middleware context
-**Client behavior:** Retrieves nonce from `<meta property="csp-nonce">` tag
+The isomorphic wrapper broke AsyncLocalStorage context chain, preventing nonce access.
+Use direct context access instead (see Quick Start above).
 
-**Returns:** Isomorphic function that returns the current nonce
+**Migration:** See [MIGRATION-1.0-to-1.0.1.md](./docs/MIGRATION-1.0-to-1.0.1.md)
 
-**Example:**
+**Correct pattern (v1.0.1+):**
 ```typescript
-import { createNonceGetter } from '@enalmada/start-secure';
-
-const getNonce = createNonceGetter();
-const router = createRouter({ ssr: { nonce: getNonce() } });
+export async function getRouter() {
+  let nonce: string | undefined;
+  if (typeof window === 'undefined') {
+    const { getStartContext } = await import('@tanstack/start-storage-context');
+    nonce = getStartContext().contextAfterGlobalMiddlewares?.nonce;
+  }
+  return createRouter({ ssr: { nonce } });
+}
 ```
 
 #### `generateNonce()`
@@ -383,11 +408,15 @@ export const startInstance = createStart(() => ({
   ]
 }));
 
-// src/router.tsx (UPDATED)
-import { createNonceGetter } from '@enalmada/start-secure';
-
-const getNonce = createNonceGetter();
-const router = createRouter({ ssr: { nonce: getNonce() } });
+// src/router.tsx (UPDATED - v1.0.1)
+export async function getRouter() {
+  let nonce: string | undefined;
+  if (typeof window === 'undefined') {
+    const { getStartContext } = await import('@tanstack/start-storage-context');
+    nonce = getStartContext().contextAfterGlobalMiddlewares?.nonce;
+  }
+  return createRouter({ ssr: { nonce } });
+}
 
 // src/server.ts (SIMPLIFIED)
 const fetch = createStartHandler(defaultStreamHandler);
