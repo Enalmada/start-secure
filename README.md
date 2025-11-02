@@ -12,20 +12,20 @@ Security header management for TanStack Start applications with native nonce sup
 - 🔄 Automatic CSP rule merging and deduplication
 - 🛠️ Development mode support (HMR, eval, WebSocket)
 - 📝 Rule descriptions for documentation
-- 🔐 **Native per-request nonce generation** (v0.2+)
-- ⚡ **Middleware pattern** for TanStack Start (v0.2+)
-- 🌐 **Isomorphic nonce access** (server + client)
-- 🚀 Minimal setup (~10 lines)
+- 🔐 **Native per-request nonce generation**
+- ⚡ **Middleware pattern** for TanStack Start
+- 🎯 **Official TanStack pattern** (direct context access)
+- 🚀 Minimal setup (~20 lines)
 
-## What's New in v0.2
+## Overview
 
-TanStack Start now has **native nonce support** via `router.options.ssr.nonce`. This package has been updated to provide:
+TanStack Start has **native nonce support** via `router.options.ssr.nonce`. This package provides:
 
 - **Per-request nonce generation** - Unique cryptographic nonce for each request
 - **Middleware pattern** - Integrates with TanStack Start's global middleware system
-- **Isomorphic nonce getter** - Works seamlessly on server and client
 - **No `'unsafe-inline'` for scripts** - Strict CSP in production (scripts only, styles remain pragmatic)
 - **Automatic nonce application** - TanStack router applies nonces to all framework scripts
+- **Direct context access** - Official TanStack pattern (no broken wrappers)
 
 **Reference:** [TanStack Router Discussion #3028](https://github.com/TanStack/router/discussions/3028)
 
@@ -35,7 +35,7 @@ TanStack Start now has **native nonce support** via `router.options.ssr.nonce`. 
 bun add @enalmada/start-secure
 ```
 
-## Quick Start (v0.2 - Recommended)
+## Quick Start
 
 ### Step 1: Create CSP rules configuration
 
@@ -84,28 +84,38 @@ export const startInstance = createStart(() => ({
 
 ```typescript
 import { createRouter } from '@tanstack/react-router';
-import { createNonceGetter } from '@enalmada/start-secure';
 
-const getNonce = createNonceGetter();
+export async function getRouter() {
+  // Get nonce on server (client uses meta tag automatically)
+  let nonce: string | undefined;
 
-export function getRouter() {
+  if (typeof window === 'undefined') {
+    // Dynamic import for server-only code
+    const { getStartContext } = await import('@tanstack/start-storage-context');
+    const context = getStartContext();
+    nonce = context.contextAfterGlobalMiddlewares?.nonce;
+  }
+
   const router = createRouter({
     routeTree,
     // ... other options
-    ssr: {
-      nonce: getNonce()  // Applies nonce to all framework scripts
-    }
+    ssr: { nonce }  // Applies nonce to all framework scripts
   });
 
   return router;
 }
 ```
 
-That's it! **Total setup: ~10 lines of code.**
+**Why this pattern?**
+- Direct context access (official TanStack pattern)
+- No wrapper to break AsyncLocalStorage
+- Works on both server and client
+
+That's it! **Total setup: ~20 lines of code.**
 
 ## API Reference
 
-### v0.2 API (Recommended)
+### Middleware API (Recommended)
 
 #### `createCspMiddleware(config)`
 
@@ -131,21 +141,25 @@ const middleware = createCspMiddleware({
 });
 ```
 
-#### `createNonceGetter()`
+#### `createNonceGetter()` ⚠️ REMOVED
 
-Creates an isomorphic function that retrieves the nonce on both server and client.
+**This function has been removed due to a critical AsyncLocalStorage bug.**
 
-**Server behavior:** Retrieves nonce from TanStack Start middleware context
-**Client behavior:** Retrieves nonce from `<meta property="csp-nonce">` tag
+The isomorphic wrapper broke AsyncLocalStorage context chain, preventing nonce access.
+Use direct context access instead (see Quick Start above).
 
-**Returns:** Isomorphic function that returns the current nonce
+**Migration:** See [MIGRATION-1.0-to-1.0.1.md](./docs/MIGRATION-1.0-to-1.0.1.md)
 
-**Example:**
+**Correct pattern:**
 ```typescript
-import { createNonceGetter } from '@enalmada/start-secure';
-
-const getNonce = createNonceGetter();
-const router = createRouter({ ssr: { nonce: getNonce() } });
+export async function getRouter() {
+  let nonce: string | undefined;
+  if (typeof window === 'undefined') {
+    const { getStartContext } = await import('@tanstack/start-storage-context');
+    nonce = getStartContext().contextAfterGlobalMiddlewares?.nonce;
+  }
+  return createRouter({ ssr: { nonce } });
+}
 ```
 
 #### `generateNonce()`
@@ -230,18 +244,23 @@ interface CspMiddlewareConfig {
 
 **Production:**
 ```
-script-src 'self' 'nonce-XXX' 'strict-dynamic'
-script-src-elem 'self' 'nonce-XXX' 'strict-dynamic'
+script-src 'nonce-XXX' 'strict-dynamic'
+script-src-elem 'nonce-XXX' 'strict-dynamic'
 ```
 
 - ✅ Unique nonce per request
 - ✅ `'strict-dynamic'` allows nonce-verified scripts to load other scripts
-- ✅ `'unsafe-inline'` is ignored when nonce present (CSP Level 2+ backward compatibility)
+- ✅ No `'self'`, `'unsafe-inline'`, or URL whitelists (ignored by `'strict-dynamic'`)
 - ✅ No inline scripts without nonce
 
 **Development:**
-- Adds `'unsafe-eval'` for source maps and dev tools
-- Adds `https:` and `http:` for CDN scripts during development
+```
+script-src 'nonce-XXX' 'strict-dynamic' 'unsafe-eval'
+script-src-elem 'nonce-XXX' 'strict-dynamic'
+```
+
+- Adds `'unsafe-eval'` to `script-src` only (for source maps and dev tools)
+- `'unsafe-eval'` NOT added to `script-src-elem` (causes browser warning)
 
 ### Styles: Pragmatic Approach
 
@@ -267,13 +286,17 @@ The package properly handles granular directives (`-elem`, `-attr`):
 1. User rules can target base directives (`script-src`, `style-src`)
 2. Sources are automatically copied to granular directives
 3. CSP Level 3 browsers check granular directives first
+4. **Exception:** `'unsafe-eval'` is NOT copied from `script-src` to `script-src-elem` (prevents browser warning)
 
-**Example:**
+**How it works:**
 ```typescript
-// User rule adds external font
-{ 'font-src': 'https://fonts.gstatic.com' }
+// Base directives (user or default)
+script-src 'nonce-XXX' 'strict-dynamic' 'unsafe-eval'  // (dev mode)
 
-// Automatically merged with base directive and copied to granular if present
+// Automatically copied to granular directive (minus unsafe-eval)
+script-src-elem 'nonce-XXX' 'strict-dynamic'  // No unsafe-eval here
+
+// Result: Zero browser warnings
 ```
 
 ## Examples
@@ -350,11 +373,11 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload (product
 Permissions-Policy: camera=(), microphone=(), geolocation=(), ...
 ```
 
-## Migration from v0.1
+## Migration from Handler Wrapper Pattern
 
 If you're using the old `createSecureHandler` API, here's how to migrate:
 
-### Before (v0.1)
+### Before (Handler Wrapper - Deprecated)
 
 ```typescript
 // src/server.ts
@@ -370,7 +393,7 @@ export default {
 };
 ```
 
-### After (v0.2)
+### After (Middleware Pattern - Recommended)
 
 ```typescript
 // src/start.ts (NEW FILE)
@@ -384,16 +407,20 @@ export const startInstance = createStart(() => ({
 }));
 
 // src/router.tsx (UPDATED)
-import { createNonceGetter } from '@enalmada/start-secure';
-
-const getNonce = createNonceGetter();
-const router = createRouter({ ssr: { nonce: getNonce() } });
+export async function getRouter() {
+  let nonce: string | undefined;
+  if (typeof window === 'undefined') {
+    const { getStartContext } = await import('@tanstack/start-storage-context');
+    nonce = getStartContext().contextAfterGlobalMiddlewares?.nonce;
+  }
+  return createRouter({ ssr: { nonce } });
+}
 
 // src/server.ts (SIMPLIFIED)
 const fetch = createStartHandler(defaultStreamHandler);
 ```
 
-### Benefits of v0.2
+### Benefits of Middleware Pattern
 
 - ✅ Per-request nonce generation (not static)
 - ✅ No `'unsafe-inline'` for scripts in production
@@ -403,9 +430,9 @@ const fetch = createStartHandler(defaultStreamHandler);
 
 ---
 
-## Legacy API (v0.1)
+## Legacy API (Handler Wrapper)
 
-The v0.1 handler wrapper API is still available for backward compatibility but is **deprecated**. Please migrate to v0.2 for better security.
+The old handler wrapper API is still available for backward compatibility but is **deprecated**. Please migrate to the middleware pattern for better security.
 
 ### `createSecureHandler(config)` (Deprecated)
 

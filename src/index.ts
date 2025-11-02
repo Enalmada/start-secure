@@ -23,4 +23,6 @@ export type {
 export type { CspMiddlewareConfig } from "./middleware";
 // New v0.2 API - Middleware pattern with per-request nonces
 export { createCspMiddleware } from "./middleware";
-export { createNonceGetter, generateNonce } from "./nonce";
+// Note: createNonceGetter removed in v1.0.1 due to AsyncLocalStorage bug
+// Use direct context access instead (see docs/MIGRATION-1.0-to-1.0.1.md)
+export { generateNonce } from "./nonce";

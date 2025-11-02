@@ -1,10 +1,7 @@
 /**
- * Nonce generation and retrieval utilities
- * Provides cryptographically secure nonce generation and isomorphic nonce access
+ * Nonce generation utilities
+ * Provides cryptographically secure nonce generation for CSP middleware
  */
-
-import { createIsomorphicFn } from "@tanstack/react-start";
-import { getStartContext } from "@tanstack/start-storage-context";
 
 /**
  * Generate cryptographically secure random nonce for CSP
@@ -25,36 +22,33 @@ export function generateNonce(): string {
 }
 
 /**
- * Create isomorphic function to get nonce on both server and client
+ * REMOVED: createNonceGetter() - Had critical AsyncLocalStorage bug
  *
- * Server: Retrieves from TanStack Start global middleware context
- * Client: Retrieves from meta tag (auto-created by TanStack Start)
- *
- * @returns Function that retrieves nonce from appropriate context
+ * The isomorphic wrapper broke AsyncLocalStorage context chain, preventing
+ * access to middleware nonce. Use direct context access instead:
  *
  * @example
  * ```typescript
  * import { createRouter } from '@tanstack/react-router';
- * import { createNonceGetter } from '@enalmada/start-secure';
  *
- * const getNonce = createNonceGetter();
- *
- * const router = createRouter({
- *   // ... other options
- *   ssr: {
- *     nonce: getNonce()  // Applies nonce to all <Scripts> and <ScriptOnce>
+ * export async function getRouter() {
+ *   // Get nonce on server (client uses meta tag automatically)
+ *   let nonce: string | undefined;
+ *   if (typeof window === 'undefined') {
+ *     const { getStartContext } = await import('@tanstack/start-storage-context');
+ *     const context = getStartContext();
+ *     nonce = context.contextAfterGlobalMiddlewares?.nonce;
  *   }
- * });
+ *
+ *   return createRouter({
+ *     // ... other options
+ *     ssr: { nonce }  // TanStack Start applies to all framework scripts
+ *   });
+ * }
  * ```
+ *
+ * This follows the official TanStack Router pattern:
+ * https://github.com/TanStack/router/discussions/3028
+ *
+ * See docs/MIGRATION-1.0-to-1.0.1.md for migration guide.
  */
-export function createNonceGetter() {
-	return createIsomorphicFn()
-		.server(() => {
-			const context = getStartContext();
-			return context.contextAfterGlobalMiddlewares?.nonce;
-		})
-		.client(() => {
-			const meta = document.querySelector("meta[property='csp-nonce']");
-			return meta?.getAttribute("content") ?? undefined;
-		});
-}

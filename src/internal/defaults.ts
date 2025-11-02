@@ -81,11 +81,16 @@ export function getDefaultCspDirectives(isDev: boolean, nonce?: string): Record<
 		"manifest-src": ["'self'"],
 		"media-src": ["'self'"],
 		"object-src": ["'none'"],
+		// CSP Level 3: Use nonce + strict-dynamic for scripts
+		// Removes redundant 'self' and 'unsafe-inline' to avoid console warnings
+		// Fallback to 'unsafe-inline' only if no nonce provided (legacy support)
 		"script-src": [
-			"'self'",
-			...(isDev ? ["'unsafe-eval'"] : []),
-			...(nonce ? [`'nonce-${nonce}'`, "'strict-dynamic'"] : ["'unsafe-inline'"]),
+			...(nonce
+				? [`'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])]
+				: ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : [])]),
 		],
+		// script-src-elem: 'unsafe-eval' not included (only applies to script-src)
+		"script-src-elem": [...(nonce ? [`'nonce-${nonce}'`, "'strict-dynamic'"] : ["'self'", "'unsafe-inline'"])],
 		"style-src": ["'self'", ...(nonce ? [`'nonce-${nonce}'`] : ["'unsafe-inline'"])],
 		"worker-src": ["'self'", "blob:"],
 	};
