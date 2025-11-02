@@ -31,24 +31,25 @@ export function buildCspHeader(rules: CspRule[], nonce: string, isDev: boolean):
 		"manifest-src": ["'self'"],
 		"media-src": ["'self'"],
 		"object-src": ["'none'"],
-		// Script sources with nonce
-		// Note: 'unsafe-inline' is ignored when nonce is present (CSP Level 2+)
-		// It's included for backward compatibility with older browsers
-		"script-src": [
-			"'self'",
-			`'nonce-${nonce}'`,
-			"'unsafe-inline'",
-			"'strict-dynamic'",
-			...(isDev ? ["'unsafe-eval'", "https:", "http:"] : []),
-		],
-		// Allow <script> elements (tags)
-		"script-src-elem": [
-			"'self'",
-			`'nonce-${nonce}'`,
-			"'unsafe-inline'",
-			"'strict-dynamic'",
-			...(isDev ? ["'unsafe-eval'", "https:", "http:"] : []),
-		],
+		// Script sources with nonce and strict-dynamic (CSP Level 3)
+		//
+		// CSP Level 3 strict-dynamic behavior:
+		// - Scripts with valid nonces can load other scripts (trusted chain)
+		// - The following directives are IGNORED and cause browser console warnings:
+		//   × 'self' - Ignored with 'strict-dynamic' (use nonce-based trust instead)
+		//   × 'unsafe-inline' - Ignored when nonce is present
+		//   × https: / http: - Ignored with 'strict-dynamic' (overly permissive)
+		//   × URL whitelists - Ignored with 'strict-dynamic' (use nonce chain)
+		//
+		// Development mode: Adds 'unsafe-eval' for source maps and dev tools
+		// Production mode: Strict nonce-only execution
+		//
+		// Why no fallbacks?
+		// If you're using 'strict-dynamic', you're targeting CSP Level 3 browsers.
+		// Adding fallbacks for older browsers just creates console noise without benefit.
+		"script-src": [`'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])],
+		// Allow <script> elements (tags) - same rules as script-src
+		"script-src-elem": [`'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])],
 		// Inline event handlers (onclick, onload, etc.) - generally avoid these
 		// Only add if you need inline event handlers
 		// "script-src-attr": ["'unsafe-inline'"],
