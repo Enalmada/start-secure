@@ -379,7 +379,7 @@ import { createCspMiddleware } from '@enalmada/start-secure';
 
 export const startInstance = createStart(() => ({
   requestMiddleware: [
-    createCspMiddleware({ rules: cspRules, options: { isDev: true } })
+    createCspMiddleware({ rules: cspRules, options: { isDev: process.env.NODE_ENV !== 'production' } })
   ]
 }));
 

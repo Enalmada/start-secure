@@ -78,7 +78,7 @@ export function buildCspHeader(rules: CspRule[], nonce: string, isDev: boolean):
 			}
 
 			// Add values (split if string)
-			const values = typeof value === "string" ? value.split(" ") : value;
+			const values = typeof value === "string" ? value.split(/\s+/) : value;
 			for (const v of values) {
 				if (v && !directives[directive].includes(v)) {
 					directives[directive].push(v);
@@ -90,18 +90,17 @@ export function buildCspHeader(rules: CspRule[], nonce: string, isDev: boolean):
 	// Copy sources from base directives to granular directives
 	// When CSP Level 3 browsers see -elem/-attr directives, they ONLY use those
 	// So we need to ensure sources from base directives are copied over
-	if (directives["style-src"] && directives["style-src-elem"]) {
-		for (const source of directives["style-src"]) {
-			if (!directives["style-src-elem"].includes(source)) {
-				directives["style-src-elem"].push(source);
-			}
-		}
-	}
+	const directivesToCopy: [string, string][] = [
+		["style-src", "style-src-elem"],
+		["script-src", "script-src-elem"],
+	];
 
-	if (directives["script-src"] && directives["script-src-elem"]) {
-		for (const source of directives["script-src"]) {
-			if (!directives["script-src-elem"].includes(source)) {
-				directives["script-src-elem"].push(source);
+	for (const [base, granular] of directivesToCopy) {
+		if (directives[base] && directives[granular]) {
+			for (const source of directives[base]) {
+				if (!directives[granular].includes(source)) {
+					directives[granular].push(source);
+				}
 			}
 		}
 	}
