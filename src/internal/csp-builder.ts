@@ -48,8 +48,9 @@ export function buildCspHeader(rules: CspRule[], nonce: string, isDev: boolean):
 		// If you're using 'strict-dynamic', you're targeting CSP Level 3 browsers.
 		// Adding fallbacks for older browsers just creates console noise without benefit.
 		"script-src": [`'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])],
-		// Allow <script> elements (tags) - same rules as script-src
-		"script-src-elem": [`'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])],
+		// Allow <script> elements (tags) - nonce + strict-dynamic only
+		// Note: 'unsafe-eval' not included here (only applies to script-src, not script-src-elem)
+		"script-src-elem": [`'nonce-${nonce}'`, "'strict-dynamic'"],
 		// Inline event handlers (onclick, onload, etc.) - generally avoid these
 		// Only add if you need inline event handlers
 		// "script-src-attr": ["'unsafe-inline'"],

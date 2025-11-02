@@ -89,6 +89,8 @@ export function getDefaultCspDirectives(isDev: boolean, nonce?: string): Record<
 				? [`'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])]
 				: ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : [])]),
 		],
+		// script-src-elem: 'unsafe-eval' not included (only applies to script-src)
+		"script-src-elem": [...(nonce ? [`'nonce-${nonce}'`, "'strict-dynamic'"] : ["'self'", "'unsafe-inline'"])],
 		"style-src": ["'self'", ...(nonce ? [`'nonce-${nonce}'`] : ["'unsafe-inline'"])],
 		"worker-src": ["'self'", "blob:"],
 	};
