@@ -59,7 +59,8 @@
 	"module": "./dist/index.mjs",
 	"packageManager": "bun@1.2.23",
 	"peerDependencies": {
-		"@tanstack/react-start": ">=1.0.0"
+		"@tanstack/react-start": ">=1.0.0",
+		"@tanstack/start-storage-context": ">=1.0.0"
 	},
 	"publishConfig": {
 		"access": "public"
