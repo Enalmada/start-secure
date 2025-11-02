@@ -244,18 +244,23 @@ interface CspMiddlewareConfig {
 
 **Production:**
 ```
-script-src 'self' 'nonce-XXX' 'strict-dynamic'
-script-src-elem 'self' 'nonce-XXX' 'strict-dynamic'
+script-src 'nonce-XXX' 'strict-dynamic'
+script-src-elem 'nonce-XXX' 'strict-dynamic'
 ```
 
 - ✅ Unique nonce per request
 - ✅ `'strict-dynamic'` allows nonce-verified scripts to load other scripts
-- ✅ `'unsafe-inline'` is ignored when nonce present (CSP Level 2+ backward compatibility)
+- ✅ No `'self'`, `'unsafe-inline'`, or URL whitelists (ignored by `'strict-dynamic'`)
 - ✅ No inline scripts without nonce
 
 **Development:**
-- Adds `'unsafe-eval'` for source maps and dev tools
-- Adds `https:` and `http:` for CDN scripts during development
+```
+script-src 'nonce-XXX' 'strict-dynamic' 'unsafe-eval'
+script-src-elem 'nonce-XXX' 'strict-dynamic'
+```
+
+- Adds `'unsafe-eval'` to `script-src` only (for source maps and dev tools)
+- `'unsafe-eval'` NOT added to `script-src-elem` (causes browser warning)
 
 ### Styles: Pragmatic Approach
 
@@ -281,13 +286,17 @@ The package properly handles granular directives (`-elem`, `-attr`):
 1. User rules can target base directives (`script-src`, `style-src`)
 2. Sources are automatically copied to granular directives
 3. CSP Level 3 browsers check granular directives first
+4. **Exception:** `'unsafe-eval'` is NOT copied from `script-src` to `script-src-elem` (prevents browser warning)
 
-**Example:**
+**How it works:**
 ```typescript
-// User rule adds external font
-{ 'font-src': 'https://fonts.gstatic.com' }
+// Base directives (user or default)
+script-src 'nonce-XXX' 'strict-dynamic' 'unsafe-eval'  // (dev mode)
 
-// Automatically merged with base directive and copied to granular if present
+// Automatically copied to granular directive (minus unsafe-eval)
+script-src-elem 'nonce-XXX' 'strict-dynamic'  // No unsafe-eval here
+
+// Result: Zero browser warnings
 ```
 
 ## Examples
