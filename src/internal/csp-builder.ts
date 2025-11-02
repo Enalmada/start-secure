@@ -92,6 +92,10 @@ export function buildCspHeader(rules: CspRule[], nonce: string, isDev: boolean):
 	// Copy sources from base directives to granular directives
 	// When CSP Level 3 browsers see -elem/-attr directives, they ONLY use those
 	// So we need to ensure sources from base directives are copied over
+	//
+	// Exception: 'unsafe-eval' should NOT be copied to script-src-elem
+	// According to CSP spec, 'unsafe-eval' controls eval()/Function() execution,
+	// which is governed by script-src, not script-src-elem (which controls <script> elements)
 	const directivesToCopy: [string, string][] = [
 		["style-src", "style-src-elem"],
 		["script-src", "script-src-elem"],
@@ -100,6 +104,10 @@ export function buildCspHeader(rules: CspRule[], nonce: string, isDev: boolean):
 	for (const [base, granular] of directivesToCopy) {
 		if (directives[base] && directives[granular]) {
 			for (const source of directives[base]) {
+				// Don't copy 'unsafe-eval' to script-src-elem (causes browser warning)
+				if (granular === "script-src-elem" && source === "'unsafe-eval'") {
+					continue;
+				}
 				if (!directives[granular].includes(source)) {
 					directives[granular].push(source);
 				}
