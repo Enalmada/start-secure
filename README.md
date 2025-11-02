@@ -12,23 +12,12 @@ Security header management for TanStack Start applications with native nonce sup
 - 🔄 Automatic CSP rule merging and deduplication
 - 🛠️ Development mode support (HMR, eval, WebSocket)
 - 📝 Rule descriptions for documentation
-- 🔐 **Native per-request nonce generation** (v0.2+)
-- ⚡ **Middleware pattern** for TanStack Start (v0.2+)
-- 🎯 **Official TanStack pattern** (direct context access, v1.0.1+)
+- 🔐 **Native per-request nonce generation**
+- ⚡ **Middleware pattern** for TanStack Start
+- 🎯 **Official TanStack pattern** (direct context access)
 - 🚀 Minimal setup (~20 lines)
 
-## What's New in v1.0.1
-
-**BREAKING CHANGE:** Removed `createNonceGetter()` due to critical AsyncLocalStorage bug.
-
-**Why the change?**
-- The isomorphic wrapper broke AsyncLocalStorage context chain
-- Scripts were rendered without nonce attributes
-- Fixed by using direct context access (official TanStack pattern)
-
-**Migration:** See [MIGRATION-1.0-to-1.0.1.md](./docs/MIGRATION-1.0-to-1.0.1.md)
-
-## What's New in v1.0.0 (Previously v0.2)
+## Overview
 
 TanStack Start has **native nonce support** via `router.options.ssr.nonce`. This package provides:
 
@@ -36,7 +25,7 @@ TanStack Start has **native nonce support** via `router.options.ssr.nonce`. This
 - **Middleware pattern** - Integrates with TanStack Start's global middleware system
 - **No `'unsafe-inline'` for scripts** - Strict CSP in production (scripts only, styles remain pragmatic)
 - **Automatic nonce application** - TanStack router applies nonces to all framework scripts
-- **Direct context access** - Official TanStack pattern (v1.0.1+)
+- **Direct context access** - Official TanStack pattern (no broken wrappers)
 
 **Reference:** [TanStack Router Discussion #3028](https://github.com/TanStack/router/discussions/3028)
 
@@ -46,7 +35,7 @@ TanStack Start has **native nonce support** via `router.options.ssr.nonce`. This
 bun add @enalmada/start-secure
 ```
 
-## Quick Start (v1.0.1 - Recommended)
+## Quick Start
 
 ### Step 1: Create CSP rules configuration
 
@@ -126,7 +115,7 @@ That's it! **Total setup: ~20 lines of code.**
 
 ## API Reference
 
-### v0.2 API (Recommended)
+### Middleware API (Recommended)
 
 #### `createCspMiddleware(config)`
 
@@ -152,7 +141,7 @@ const middleware = createCspMiddleware({
 });
 ```
 
-#### `createNonceGetter()` ⚠️ REMOVED in v1.0.1
+#### `createNonceGetter()` ⚠️ REMOVED
 
 **This function has been removed due to a critical AsyncLocalStorage bug.**
 
@@ -161,7 +150,7 @@ Use direct context access instead (see Quick Start above).
 
 **Migration:** See [MIGRATION-1.0-to-1.0.1.md](./docs/MIGRATION-1.0-to-1.0.1.md)
 
-**Correct pattern (v1.0.1+):**
+**Correct pattern:**
 ```typescript
 export async function getRouter() {
   let nonce: string | undefined;
@@ -375,11 +364,11 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload (product
 Permissions-Policy: camera=(), microphone=(), geolocation=(), ...
 ```
 
-## Migration from v0.1
+## Migration from Handler Wrapper Pattern
 
 If you're using the old `createSecureHandler` API, here's how to migrate:
 
-### Before (v0.1)
+### Before (Handler Wrapper - Deprecated)
 
 ```typescript
 // src/server.ts
@@ -395,7 +384,7 @@ export default {
 };
 ```
 
-### After (v0.2)
+### After (Middleware Pattern - Recommended)
 
 ```typescript
 // src/start.ts (NEW FILE)
@@ -408,7 +397,7 @@ export const startInstance = createStart(() => ({
   ]
 }));
 
-// src/router.tsx (UPDATED - v1.0.1)
+// src/router.tsx (UPDATED)
 export async function getRouter() {
   let nonce: string | undefined;
   if (typeof window === 'undefined') {
@@ -422,7 +411,7 @@ export async function getRouter() {
 const fetch = createStartHandler(defaultStreamHandler);
 ```
 
-### Benefits of v0.2
+### Benefits of Middleware Pattern
 
 - ✅ Per-request nonce generation (not static)
 - ✅ No `'unsafe-inline'` for scripts in production
@@ -432,9 +421,9 @@ const fetch = createStartHandler(defaultStreamHandler);
 
 ---
 
-## Legacy API (v0.1)
+## Legacy API (Handler Wrapper)
 
-The v0.1 handler wrapper API is still available for backward compatibility but is **deprecated**. Please migrate to v0.2 for better security.
+The old handler wrapper API is still available for backward compatibility but is **deprecated**. Please migrate to the middleware pattern for better security.
 
 ### `createSecureHandler(config)` (Deprecated)
 
