@@ -80,7 +80,31 @@ export function buildCspHeader(rules: CspRule[], nonce: string, isDev: boolean):
 			}
 
 			// Add values (split if string)
-			const values = typeof value === "string" ? value.split(/\s+/) : value;
+			let values = typeof value === "string" ? value.split(/\s+/) : value;
+
+			// Filter out empty strings
+			values = values.filter((v: string) => v && v.trim() !== "");
+
+			// Special handling for 'none' keyword:
+			// According to CSP spec, 'none' must be the ONLY value in a directive
+
+			// Case 1: If user is adding 'none' with other values, remove 'none' (invalid mix)
+			if (values.length > 1 && values.includes("'none'")) {
+				values = values.filter((v: string) => v !== "'none'");
+			}
+
+			// Case 2: If user is adding ONLY 'none', clear directive and set to 'none'
+			if (values.length === 1 && values[0] === "'none'") {
+				directives[directive] = ["'none'"];
+				continue; // Skip the normal addition loop
+			}
+
+			// Case 3: If directive has 'none' and we're adding other values, remove 'none'
+			if (values.length > 0 && directives[directive].includes("'none'")) {
+				directives[directive] = directives[directive].filter((v) => v !== "'none'");
+			}
+
+			// Add the values
 			for (const v of values) {
 				if (v && !directives[directive].includes(v)) {
 					directives[directive].push(v);
