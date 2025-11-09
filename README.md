@@ -37,6 +37,8 @@ bun add @enalmada/start-secure
 
 ## Quick Start
 
+> **💡 Complete Example:** See [@enalmada/tanstarter](https://github.com/Enalmada/tanstarter) for a production-ready implementation with authentication, database, and full CSP integration.
+
 ### Step 1: Create CSP rules configuration
 
 **File:** `src/config/cspRules.ts`
@@ -112,6 +114,15 @@ export async function getRouter() {
 - Works on both server and client
 
 That's it! **Total setup: ~20 lines of code.**
+
+### Working Example
+
+See this pattern in action in [@enalmada/tanstarter](https://github.com/Enalmada/tanstarter) - a full-featured TanStack Start application demonstrating:
+- ✅ Multi-service CSP rules (Google Auth, Sentry, PostHog)
+- ✅ Nonce-based script security in production
+- ✅ Development mode with HMR support
+- ✅ Integration with authentication and database
+- ✅ Complete type safety throughout
 
 ## API Reference
 
@@ -301,6 +312,8 @@ script-src-elem 'nonce-XXX' 'strict-dynamic'  // No unsafe-eval here
 
 ## Examples
 
+For a complete, production-ready implementation, see [@enalmada/tanstarter](https://github.com/Enalmada/tanstarter).
+
 ### Multiple Service Rules
 
 ```typescript
@@ -469,3 +482,8 @@ MIT © Adam Lane
 ## Credits
 
 Inspired by [@enalmada/next-secure](https://github.com/Enalmada/next-secure).
+
+## Related Projects
+
+- [@enalmada/tanstarter](https://github.com/Enalmada/tanstarter) - Production-ready TanStack Start template with start-secure integration
+- [@enalmada/next-secure](https://github.com/Enalmada/next-secure) - Security headers for Next.js applications
