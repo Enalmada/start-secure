@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- 1b0cae9: Declare the supported TanStack Start range and drop an unused peer
+
+  - `@tanstack/react-start` peer is now `>=1.132.0` (was `>=1.0.0`). That is the first version with `createStart({ requestMiddleware })`, which the README pattern needs; earlier versions never worked with `createCspMiddleware`.
+  - Removed the `@tanstack/start-storage-context` peer. The library never imports it; only the router nonce snippet in the README does. If you use that snippet, install `@tanstack/start-storage-context` in your app (you already do if you copied it). The loose peer could also resolve to a stale copy that does not share Start's request storage, which makes the nonce come back `undefined`.
+
+### Patch Changes
+
+- 4f4afc8: Stop mutating TanStack Start's read-only response header snapshot
+
+  `createCspMiddleware` built its headers by calling `.set()` on the object returned by `getResponseHeaders()`. Current TanStack Start returns a read-only snapshot there, so every request logged `getResponseHeaders().set() does not change the response` once per header. The headers still reached the response through the final `setResponseHeaders` call, but the log was noisy.
+
+  The middleware now applies each header with `setResponseHeader`. The headers sent are unchanged.
+
+  It deliberately does not use `setResponseHeaders(new Headers())`: before Start 1.169.34 that helper reads its argument with `Object.entries`, so a `Headers` object sets nothing and every security header would be silently dropped. `setResponseHeader` behaves the same on every supported version.
+
 ## 1.0.2
 
 ### Patch Changes
@@ -23,7 +42,6 @@
 - 25686c0: **BREAKING CHANGE:** Remove broken `createNonceGetter()` function
 
   ## What Changed
-
   - **Removed:** `createNonceGetter()` function (had critical AsyncLocalStorage bug)
   - **Updated:** README with official TanStack pattern using direct context access
   - **Updated:** API documentation to show deprecation notice
@@ -53,9 +71,8 @@
   export async function getRouter() {
     let nonce: string | undefined;
     if (typeof window === "undefined") {
-      const { getStartContext } = await import(
-        "@tanstack/start-storage-context"
-      );
+      const { getStartContext } =
+        await import("@tanstack/start-storage-context");
       nonce = getStartContext().contextAfterGlobalMiddlewares?.nonce;
     }
     return createRouter({ ssr: { nonce } });
