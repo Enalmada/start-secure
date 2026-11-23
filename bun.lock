@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "@enalmada/start-secure",
@@ -17,8 +18,7 @@
         "vitest": "^4.0.6",
       },
       "peerDependencies": {
-        "@tanstack/react-start": ">=1.0.0",
-        "@tanstack/start-storage-context": ">=1.0.0",
+        "@tanstack/react-start": ">=1.132.0",
       },
     },
   },

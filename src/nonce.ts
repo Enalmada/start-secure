@@ -47,6 +47,9 @@ export function generateNonce(): string {
  * }
  * ```
  *
+ * `@tanstack/start-storage-context` is your app's own dependency for this snippet; this
+ * package does not import it.
+ *
  * This follows the official TanStack Router pattern:
  * https://github.com/TanStack/router/discussions/3028
  *
