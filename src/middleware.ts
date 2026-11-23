@@ -4,7 +4,7 @@
  */
 
 import { createMiddleware } from "@tanstack/react-start";
-import { setResponseHeaders } from "@tanstack/react-start/server";
+import { setResponseHeader } from "@tanstack/react-start/server";
 import { buildCspHeader } from "./internal/csp-builder";
 import type { CspRule, SecurityOptions } from "./internal/types";
 import { generateNonce } from "./nonce";
@@ -60,10 +60,12 @@ export function createCspMiddleware(config: CspMiddlewareConfig = {}) {
 		// Build CSP header with nonce
 		const cspHeader = buildCspHeader(rules, nonce, isDev);
 
-		// Collect our headers in a fresh Headers object. getResponseHeaders() returns a read-only
-		// snapshot in current TanStack Start: mutating it logs a warning on every request and only
-		// takes effect through the setResponseHeaders call below.
-		const headers = new Headers();
+		// Collect our headers, then apply them one by one with setResponseHeader. Not
+		// getResponseHeaders().set(): since Start 1.169 that is a read-only snapshot, and mutating it
+		// logs a warning on every request. Not setResponseHeaders(headers) either: before Start 1.169.34
+		// it reads its argument with Object.entries, so a Headers object sets nothing. The singular
+		// setResponseHeader behaves the same on every supported version.
+		const headers = new Map<string, string>();
 
 		// Set Content Security Policy
 		headers.set("Content-Security-Policy", cspHeader);
@@ -91,7 +93,9 @@ export function createCspMiddleware(config: CspMiddlewareConfig = {}) {
 		}
 
 		// Apply headers
-		setResponseHeaders(headers);
+		for (const [name, value] of headers) {
+			setResponseHeader(name, value);
+		}
 
 		// Pass nonce through context for router
 		return next({

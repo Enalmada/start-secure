@@ -33,6 +33,9 @@ TanStack Start has **native nonce support** via `router.options.ssr.nonce`. This
 
 ```bash
 bun add @enalmada/start-secure
+# Needed by the router nonce snippet below (getStartContext). Install it yourself;
+# this package no longer lists it as a peer.
+bun add @tanstack/start-storage-context
 ```
 
 ## Quick Start
