@@ -16,7 +16,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.6.8",
-		"@changesets/cli": "^2.31.1",
+		"@changesets/cli": "^3.0.3",
 		"@enalmada/bun-externals": "0.0.9",
 		"@tanstack/react-start": "^1.169.7",
 		"@types/bun": "^1.4.5",
