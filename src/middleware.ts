@@ -4,7 +4,7 @@
  */
 
 import { createMiddleware } from "@tanstack/react-start";
-import { getResponseHeaders, setResponseHeaders } from "@tanstack/react-start/server";
+import { setResponseHeaders } from "@tanstack/react-start/server";
 import { buildCspHeader } from "./internal/csp-builder";
 import type { CspRule, SecurityOptions } from "./internal/types";
 import { generateNonce } from "./nonce";
@@ -60,8 +60,10 @@ export function createCspMiddleware(config: CspMiddlewareConfig = {}) {
 		// Build CSP header with nonce
 		const cspHeader = buildCspHeader(rules, nonce, isDev);
 
-		// Get response headers
-		const headers = getResponseHeaders();
+		// Collect our headers in a fresh Headers object. getResponseHeaders() returns a read-only
+		// snapshot in current TanStack Start: mutating it logs a warning on every request and only
+		// takes effect through the setResponseHeaders call below.
+		const headers = new Headers();
 
 		// Set Content Security Policy
 		headers.set("Content-Security-Policy", cspHeader);
